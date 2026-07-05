@@ -281,7 +281,7 @@ $$
 
 $$
 \frac{p_{ij}}{u_j} \cdot (G_{jj} u_j) = p_{ij} G_{jj}
-\implies \mathcal{C}_p G u = PGI
+\implies \mathcal{C}_p G u = PG[1, 1, \ldots, 1]^T = PG\mathbf{1}_n
 $$
 
 
@@ -290,7 +290,7 @@ Where $P$ is a constant matrix consist of $P_{ij}$
 When $m = n$, the system is fully actuated and we can solve for $u$ directly:
 
 $$
-u = \begin{bmatrix} u_1 \\ u_2 \\ \vdots & \\ u_n \end{bmatrix} = G^{-1} \cdot \mathcal{C_q}^{-1} \cdot (-k \cdot \vec{e}_{error} - PG)
+u = \begin{bmatrix} u_1 \\ u_2 \\ \vdots & \\ u_n \end{bmatrix} = G^{-1} \cdot \mathcal{C_q}^{-1} \cdot (-k \cdot \vec{e}_{error} - PG\mathbf{1}_n)
 $$
 
 When $m < n$, the system is underactuated.
@@ -314,8 +314,81 @@ $$
 And get:
 
 $$
-u = \begin{bmatrix} u_1 \\ u_2 \\ \vdots & \\ u_m \end{bmatrix} = G_{selected}^{-1} \cdot \mathcal{C}_{selected}^{-1} \cdot (-k \cdot \vec{e}_{error, selected})
+u = \begin{bmatrix} u_1 \\ u_2 \\ \vdots & \\ u_m \end{bmatrix} = G_{selected}^{-1} \cdot \mathcal{C}_{selected}^{-1} \cdot (-k \cdot \vec{e}_{error, selected}- P_{selected} G_{selected} \mathbf{1}_m)
 $$
 
-
+>**Example 3.1: Coupleness-based controller for a nonholonomic unicycle**
+From the example in Section 1.3, we have the coupleness matrix $\mathcal{C}$ for the unicycle system:
+$$
+\mathcal{C} = \begin{bmatrix}
+1 & 0 & -\frac{V \sin x_3}{u} \\
+0 & 1 & \frac{V \cos x_3}{u} \\
+0 & 0 & 1
+\end{bmatrix}
+$$
+Where:
+$$
+\mathcal{C}_q = \begin{bmatrix} 
+1 & 0 & 0 \\ 
+0 & 1 & 0 \\ 
+0 & 0 & 1 
+\end{bmatrix}, \quad
+\mathcal{C}_p = \begin{bmatrix} 
+0 & 0 & -\frac{V \sin x_3}{u} \\ 
+0 & 0 & \frac{V \cos x_3}{u} \\ 
+0 & 0 & 0 
+\end{bmatrix}
+$$
+And we can extract $P$ from $\mathcal{C}_p$ as (and assume $G = I$ for simplicity):
+$$
+P = \begin{bmatrix} 
+0 & 0 & -V \sin x_3 \\ 
+0 & 0 & V \cos x_3 \\ 
+0 & 0 & 0 
+\end{bmatrix}, \quad
+\mathcal{C}_q G u= P I u = \begin{bmatrix} 
+-V\sin x_3 u_3\\ 
+V\cos x_3 u_3 \\ 
+0 
+\end{bmatrix}
+$$
+Since $\mathcal{C}_qGu$ has 2 non-zero components, we can only control 2 dimensions of the error vector at a time. Let's say we want to control the $x$ and $y$ positions of the unicycle, which correspond to $x_1$ and $x_2$. Then we can select the first two rows of $\mathcal{C}$ and $G$:
+$$
+\mathcal{C}_{selected} = \begin{bmatrix}
+1 & 0 & -\frac{V \sin x_3}{u} \\
+0 & 1 & \frac{V \cos x_3}{u}
+\end{bmatrix}, \quad
+G_{selected} = \begin{bmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0
+\end{bmatrix}
+$$
+Then we can solve for $u$ to control the $x$ and $y$ positions of the unicycle ($k=1$):
+$$
+-\vec{e}_{error, selected} = \begin{bmatrix}
+-V\sin x_3 u_3\\ 
+V\cos x_3 u_3
+\end{bmatrix}
+$$
+Here we will have to solve for $u_3$ (the angular velocity control input) to minimize the error in $x$ and $y$ positions. This can be done using numerical methods or optimization techniques, depending on the specific requirements of the control task.
+Here we first minimize the square error:
+$$
+\min_{u_3} \left( (e_{error, 1} + V \sin x_3 u_3)^2 + (e_{error, 2} - V \cos x_3 u_3)^2 \right)
+$$
+This will give us the optimal $u_3$.
+Plug this in Python code to get the result:
+![e3.1](../src/exp3.1/exp3.1cp.png)
+We can also compare it with a simple PD controller:
+![e3.1](../src/exp3.1/exp3.1pd.png)
+We can see that the coupleness-based controller's input converges faster to zero. (Actually this will be very similar to a finely tuned PD controller, but the coupleness-based controller should be able to capture deeper dynamics, so on systems with more nonlinearities, the effect will be more significant, which will be demonstrated in the next chapter.)
+Alternatively, we can define the optimization problem to be first on $\vec{e}_{error, 1}$ and then on $\vec{e}_{error, 2}$:
+$$
+\text{Objective}(u_3) = 
+\begin{cases} 
+|e_2 - V \cos(x_3) u_3| & \text{if } |e_1| < \epsilon \\ 
+|e_1 + V \sin(x_3) u_3| & \text{otherwise} 
+\end{cases}
+$$
+![exp3.1.2](../src/exp3.1/exp3.1optim2.png)
+The jittering of the control input is kind of expected here, because the optimization is switching between two objectives. However we still get the expected track for our optimization problem.
 
