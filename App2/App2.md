@@ -199,8 +199,8 @@ $$
 We can see that the coupleness matrix $\mathcal{C}$ for the unicycle system is:
 $$
 \mathcal{C} = \begin{bmatrix}
-1 & 0 & -\frac{V \sin x_3}{u} \\
-0 & 1 & \frac{V \cos x_3}{u} \\
+1 & 0 & -\frac{V \sin x_3}{u} \Delta x_3 \\
+0 & 1 & \frac{V \cos x_3}{u} \Delta x_3 \\
 0 & 0 & 1
 \end{bmatrix}
 $$
@@ -278,7 +278,6 @@ $$
 \Delta x = (\mathcal{C}_p + \mathcal{C}_q)Gu
 $$
 
-
 $$
 \frac{p_{ij}}{u_j} \cdot (G_{jj} u_j) = p_{ij} G_{jj}
 \implies \mathcal{C}_p G u = PG[1, 1, \ldots, 1]^T = PG\mathbf{1}_n
@@ -303,26 +302,22 @@ $$
 
 When $\dim(\vec{e}_{error}) > m$, we should acquire the user to specify which $m$ dimensions of the error vector are more important to be corrected.
 
-Define $\vec{e}_{error, selected}$ as the selected error vector, and $\vec{e}_{error, unselected}$ as the unselected error vector, $\dim(\vec{e}_{error, selected}) = m$, $\dim(\vec{e}_{error, unselected}) = n - m$.
+Define $\vec{e}_{error, selected}$ as the selected error vector, and $\vec{e}_{error, unselected}$ as the unselected error vector, $\dim(\vec{e}_{error, selected}) = \dim(\mathcal{C}_{p,selected})$.
 
 Then we can solve for $u$ under the new condition:
 
 $$
-\Delta x_{selected} = g_{1,ii}u_1 \begin{bmatrix} \mathcal{C}_{11} \\ \mathcal{C}_{21} \\ \vdots & \\ \mathcal{C}_{m1} \end{bmatrix} + g_{1,ii}u_2 \begin{bmatrix} \mathcal{C}_{12} \\ \mathcal{C}_{22} \\ \vdots & \\ \mathcal{C}_{m2} \end{bmatrix} + \ldots + g_{1,ii}u_m \begin{bmatrix} \mathcal{C}_{1m} \\ \mathcal{C}_{2m} \\ \vdots & \\ \mathcal{C}_{mm} \end{bmatrix} = -k \cdot \vec{e}_{error, selected}
+\Delta x_{selected} = g_{1,ii}u_1 \begin{bmatrix} \mathcal{C}_{11} \\ \mathcal{C}_{21} \\ \vdots & \\ \mathcal{C}_{m1} \end{bmatrix} + g_{1,ii}u_2 \begin{bmatrix} \mathcal{C}_{12} \\ \mathcal{C}_{22} \\ \vdots & \\ \mathcal{C}_{m2} \end{bmatrix} + \ldots + g_{1,ii}u_m \begin{bmatrix} \mathcal{C}_{1m} \\ \mathcal{C}_{2m} \\ \vdots & \\ \mathcal{C}_{mm} \end{bmatrix} = -k \cdot (\vec{e}_{error, selected} - P_{selected}G\mathbf{1}_m)
 $$
 
-And get:
-
-$$
-u = \begin{bmatrix} u_1 \\ u_2 \\ \vdots & \\ u_m \end{bmatrix} = G_{selected}^{-1} \cdot \mathcal{C}_{selected}^{-1} \cdot (-k \cdot \vec{e}_{error, selected}- P_{selected} G_{selected} \mathbf{1}_m)
-$$
+Here we will need some optimization techniques to solve for $u$.
 
 >**Example 3.1: Coupleness-based controller for a nonholonomic unicycle**
 From the example in Section 1.3, we have the coupleness matrix $\mathcal{C}$ for the unicycle system:
 $$
 \mathcal{C} = \begin{bmatrix}
-1 & 0 & -\frac{V \sin x_3}{u} \\
-0 & 1 & \frac{V \cos x_3}{u} \\
+1 & 0 & -\frac{V \sin x_3}{u} \Delta x_3\\
+0 & 1 & \frac{V \cos x_3}{u} \Delta x_3\\
 0 & 0 & 1
 \end{bmatrix}
 $$
@@ -334,29 +329,29 @@ $$
 0 & 0 & 1 
 \end{bmatrix}, \quad
 \mathcal{C}_p = \begin{bmatrix} 
-0 & 0 & -\frac{V \sin x_3}{u} \\ 
-0 & 0 & \frac{V \cos x_3}{u} \\ 
+0 & 0 & -\frac{V \sin x_3}{u} \Delta x_3 \\ 
+0 & 0 & \frac{V \cos x_3}{u} \Delta x_3 \\ 
 0 & 0 & 0 
 \end{bmatrix}
 $$
 And we can extract $P$ from $\mathcal{C}_p$ as (and assume $G = I$ for simplicity):
 $$
 P = \begin{bmatrix} 
-0 & 0 & -V \sin x_3 \\ 
-0 & 0 & V \cos x_3 \\ 
+0 & 0 & -V \sin x_3 \Delta x_3\\ 
+0 & 0 & V \cos x_3 \Delta x_3 \\ 
 0 & 0 & 0 
-\end{bmatrix}, \quad
-\mathcal{C}_q G u= P I u = \begin{bmatrix} 
--V\sin x_3 u_3\\ 
-V\cos x_3 u_3 \\ 
+\end{bmatrix}, \quad 
+\mathcal{C}_p G u= P I \mathbf{1}_n= \begin{bmatrix} 
+-V\sin x_3 \Delta x_3\\ 
+V\cos x_3 \Delta x_3 \\ 
 0 
 \end{bmatrix}
 $$
-Since $\mathcal{C}_qGu$ has 2 non-zero components, we can only control 2 dimensions of the error vector at a time. Let's say we want to control the $x$ and $y$ positions of the unicycle, which correspond to $x_1$ and $x_2$. Then we can select the first two rows of $\mathcal{C}$ and $G$:
+Since $\mathcal{C}_qGu$ has 2 non-zero components, we can only control 2 dimensions of the error vector at a time. Let's say we want to control the $x$ and $y$ positions of the unicycle, which correspond to $x_1$ and $x_2$. Then we can select the first two rows of $\mathcal{C}$ and $G$ ($\Delta x_3 = u_3 \Delta t$, while $\Delta t$ can be set to be unit for simplicity), and we have:
 $$
 \mathcal{C}_{selected} = \begin{bmatrix}
-1 & 0 & -\frac{V \sin x_3}{u} \\
-0 & 1 & \frac{V \cos x_3}{u}
+1 & 0 & -\frac{V \sin x_3}{u} \Delta x_3\\
+0 & 1 & \frac{V \cos x_3}{u} \Delta x_3
 \end{bmatrix}, \quad
 G_{selected} = \begin{bmatrix}
 1 & 0 & 0 \\
@@ -391,4 +386,3 @@ $$
 $$
 ![exp3.1.2](../src/exp3.1/exp3.1optim2.png)
 The jittering of the control input is kind of expected here, because the optimization is switching between two objectives. However we still get the expected track for our optimization problem.
-
