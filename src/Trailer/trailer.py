@@ -9,7 +9,7 @@ V = 1.0
 L1 = 1.0
 L2 = 1.0
 dt = 0.01
-time_steps = 3000
+time_steps = 1500
 
 # Initial state [x, y, theta0, theta1, theta2]
 x_start = np.array([0.0, 2.0, 1.5, 1.0, -1.2])
@@ -126,13 +126,11 @@ print(f"Final Control:  Opt = {history_u_opt[-1]:.4f}  |  PD = {history_u_pd[-1]
 # 6. Plotting (Modified)
 # ==========================================
 def plot_sim_figure(fig_num, title, x_data, u_data):
-    # 使用 1行2列 的布局，左边画轨迹，右边画控制输入
     fig, axs = plt.subplots(1, 2, figsize=(12, 5), num=fig_num)
     fig.suptitle(title, fontsize=16)
     
     tr_x, tr_y, tl1_x, tl1_y, tl2_x, tl2_y, hx = x_data
     
-    # --- Trajectories (放在左边) ---
     axs[0].plot(tr_x, tr_y, linewidth=2, label="Tractor")
     axs[0].plot(tl1_x, tl1_y, "--", linewidth=2, label="Trailer 1")
     axs[0].plot(tl2_x, tl2_y, ":", linewidth=2, label="Trailer 2")
@@ -145,8 +143,8 @@ def plot_sim_figure(fig_num, title, x_data, u_data):
     axs[0].set_xlabel("X (m)")
     axs[0].set_ylabel("Y (m)")
     axs[0].legend()
+    axs[1].set_ylim(-3.2, 5.2)
 
-    # --- Control Input (放在右边) ---
     axs[1].plot(time_axis, u_data, linewidth=2, color='purple')
     axs[1].grid(True)
     axs[1].set_title("Control Input ($u_3$)")
@@ -155,7 +153,7 @@ def plot_sim_figure(fig_num, title, x_data, u_data):
     axs[1].set_ylim(-3.2, 3.2)
     
     plt.tight_layout()
-    plt.subplots_adjust(top=0.88) # 给主标题留出一点空间
+    plt.subplots_adjust(top=0.88)
 
 # Generate Figure 1: Optimization
 plot_sim_figure(1, "Optimization Control Performance", x_opt, history_u_opt)
