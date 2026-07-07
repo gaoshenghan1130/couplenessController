@@ -47,7 +47,7 @@ for t in range(time_steps):
 
     # Solve for optimal steering input within bounds
     opt_result = minimize_scalar(cost_function, bounds=(-3.0, 3.0), method='bounded')
-    u3_opt = opt_result.x
+    u3_opt = opt_result.x # type: ignore
     history_u_opt.append(u3_opt)
 
     # System kinematics update
