@@ -154,10 +154,140 @@ $$
 \end{bmatrix}
 $$
 
-We can see that $\Delta t$ measures the "Strength" of high-order terms, so we keep it as a variable to be tuned in the controller design.
+We can see that $\Delta t$ scales the "Strength" of high-order terms, so we keep it as a variable to be tuned in the controller design. For the controller, we want to use:
 
-For the weights and gains, since we already have a LQR calculated PD controller for 
+$$
+\min_u \| \Delta X_{total} - \vec{e} \|^2
+$$
+
+Where $\vec{e} = x_{desired} - x_{current}$ is the error vector. 
+
+For the weights and gains, since we already have a LQR calculated PD controller with gains $K = [k_\theta, k_{\dot{\theta}}, k_r, k_{\dot{r}}] $, where:
+
+$$
+\begin{aligned}
+F
+&= -\left(k_{\theta} e_\theta
++ k_{\dot{\theta}} e_{\dot{\theta}}
++ k_r e_r
++ k_{\dot{r}} e_{\dot{r}}\right) \\
+&= -\left(
+(k_{\theta}+Rk_r)e_\theta
++(k_{\dot{\theta}}+Rk_{\dot{r}})e_{\dot{\theta}}
++k_r(e_r-Re_\theta)
++k_{\dot{r}}(e_{\dot{r}}-Re_{\dot{\theta}})
+\right) \\
+&=
+-\begin{bmatrix}
+k_\theta' &
+k_{\dot{\theta}}' &
+k_r' &
+k_{\dot{r}}'
+\end{bmatrix}
+\cdot \vec{e}_{pseudo}
+\end{aligned}
+$$
+
+At very close to equilibrium, the two controllers should behave equivalently, so we can use reverse engineering to find the weights for the coupleness controller:
+
+At equilibrium, we have:
+
+$$
+F_r = F - mg\sin\theta \approx F - mg\theta \\
+\tau_\theta = FR + G\sin\theta - mgr\cos\theta \approx FR + G\theta - mgr
+$$
+
+$$
+\Delta X_{total} = \begin{bmatrix}
+\dfrac{\tau_\theta}{J} \Delta t \\[6pt]
+\dfrac{F_r}{m} \Delta t \\[6pt]
+\dfrac{\tau_\theta}{J} \\[6pt]
+\dfrac{F_r}{m} 
+\end{bmatrix} = \begin{bmatrix}
+\dfrac{FR + G\theta - mgr}{J} \Delta t \\[6pt]
+\dfrac{F - mg\theta}{m} \Delta t \\[6pt]
+\dfrac{FR + G\theta - mgr}{J} \\[6pt]
+\dfrac{F - mg\theta}{m}
+\end{bmatrix}
+$$
+
+Interestingly, we can see that the first two terms are scaled by $\Delta t$, while the last two terms are not. This naturally indicate that $\dot{x_1} = x_3$ and $\dot{x_2} = x_4$, which align with our model.
+
+Since the minimization problem will be equivalent to a second order convex optimization problem, we know the poles will be the solution. Thus F is given by:
+
+$$
+\frac{d}{dF} \| \Delta X_{total} - \vec{e} \|^2 = 0 \\
+\iff \frac{d}{dF}\big[K_1(x_1 - e_1)^2 + K_2(x_2 - e_2)^2 + K_3(x_3 - e_3)^2 + K_4(x_4 - e_4)^2 \big] = 0 \\
+\iff \Sigma_{i=1}^4 K_i (x_i - e_i) \frac{dx_i}{dF} = 0
+$$
+
+Plug in $\frac{dx_1}{dF} = \frac{R}{J} \Delta t$, $\frac{dx_2}{dF} = \frac{1}{m} \Delta t$, $\frac{dx_3}{dF} = \frac{R}{J}$, $\frac{dx_4}{dF} = \frac{1}{m}$, we have:
+
+$$
+K_1 \left( \frac{FR + G\theta - mgr}{J} \Delta t - e_1 \right) \left( \frac{R \Delta t}{J} \right) + K_2 \left( \frac{F - mg\theta}{m} \Delta t - e_2 \right) \left( \frac{\Delta t}{m} \right) + K_3 \left( \frac{FR + G\theta - mgr}{J} - e_3 \right) \left( \frac{R}{J} \right) + K_4 \left( \frac{F - mg\theta}{m} - e_4 \right) \left( \frac{1}{m} \right) = 0
+$$
+
+Extracting $F$ to match the PD form of $F = -K \cdot \vec{e}$, we have:
+
+$$
+F \cdot \left( \frac{K_1 R^2 \Delta t}{J^2} + \frac{K_2 \Delta t}{m^2} + \frac{K_3 R}{J^2} + \frac{K_4}{m^2} \right) = K_1 e_1 \frac{R \Delta t}{J} + K_2 e_2 \frac{\Delta t}{m} + K_3 e_3 \frac{R}{J} + K_4 e_4 \frac{1}{m} - K_1 \left( \frac{G\theta - mgr}{J} \Delta t \right) \left( \frac{R\Delta t}{J} \right) - K_2 \left( -\frac{mg\theta}{m} \Delta t \right) \left( \frac{\Delta t}{m} \right) - K_3 \left( \frac{G\theta - mgr}{J} \right) \left( \frac{R}{J} \right) - K_4 \left( -\frac{mg\theta}{m}  \right) \left( \frac{1}{m} \right)
+$$
+
+Since we are finding the weights near equilibrium, we can ignore the terms with $\theta$ and $r$, and we have:
+
+$$
+F =\alpha\times \frac{K_1 e_1 \frac{R \Delta t}{J} + K_2 e_2 \frac{\Delta t}{m} + K_3 e_3 \frac{R}{J} + K_4 e_4 \frac{1}{m}}{\frac{K_1 R^2 \Delta t}{J^2} + \frac{K_2 \Delta t}{m^2} + \frac{K_3 R}{J^2} + \frac{K_4}{m^2}}
+$$
+
+Notice we have $K_1, K_2, K_3, K_4, \alpha, \Delta t$ as parameters to tune, we expect $K_1 = K_3, K_2 = K_4$ because $\Delta t$ scales the relationship between the term orders. Actually only the portion of $K_1, K_2, K_3, K_4$ matters, and $\alpha$ will compansate for the scale of the solution.
+
+In fact we can verify whether $K_1:K_3$ and $K_2:K_4$ are equal by comparing the ratio in the working PD gains:
+
+We have 
+
+$$
+\vec{k} = [k_\theta, k_{\dot{\theta}}, k_r, k_{\dot{r}}] = [-781.4476, -146.7735, 229.6972, 41.4447]
+$$
+
+With $R= 0.2527m$, we have:
+
+$$
+k' = [k_\theta + R k_r, \ k_r,\ k_{\dot{\theta}} + R k_{\dot{r}},\ k_{\dot{r}}] = [−723.3934,229.6972,−136.2998,41.4447]
+$$
+
+Comparing the ratio:
+
+$$
+\frac{k_1'}{k_3'} = -5.307, \quad \frac{k_2'}{k_4'} = 5.542
+$$
+
+There is only $\sim 4\%$ difference between the two ratios, which is acceptable, and some how proves our assumption. This difference is probably caused by the $R$ term in the LQR method, for cost function with no torque penalty, these two ratios should be exactly equal. For this reason, we can set $\Delta t = 5.4$.
+
+For convenience, we first consider $x_3, x_4$:
+
+$$
+K_3 = \frac{k_3'}{R/J}, K_4 = \frac{k_4'}{1/m}
+$$
+
+Naturally,
+
+$$
+K_1 = \frac{K_3}{\Delta t} = \frac{k_3'}{R/J \cdot \Delta t}, K_2 = \frac{K_4}{\Delta t} = \frac{k_4'}{1/m \cdot \Delta t} \\
+\alpha = \frac{K_1 R^2 \Delta t}{J^2} + \frac{K_2 \Delta t}{m^2} + \frac{K_3 R}{J^2} + \frac{K_4}{m^2}
+$$
+
+This concludes our design:
+
+$$
+F_{raw} = \min_F \Sigma_{i=1}^4 K_i (x_i - e_i)^2 \\
+F = \alpha F_{raw}
+$$
 
 
+#### Simulation Results
+
+For PD control with the LQR gains provided, the boundary initial theta are $0.95^\circ$ at $r = 0$, the simulation results are shown below:
+
+![alt text](../src/IPLat/PD.png)
 
 
