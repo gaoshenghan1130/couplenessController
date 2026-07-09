@@ -40,7 +40,7 @@ class SystemParameters:
         self.K_3 = self.k3_ / (self.R/self.J)
         self.K_4 = self.k4_ / (1/self.m)
         
-        self.alpha = self.K_1 * self.R**2 * self.delta_t / self.J**2 + self.K_2 * self.delta_t / self.m**2 + self.K_3 * self.R**2 / self.J**2 + self.K_4 / self.m**2
+        self.alpha = self.K_1 * self.R**2 * self.delta_t**2 / self.J**2 + self.K_2 * self.delta_t**2 / self.m**2 + self.K_3 * self.R**2 / self.J**2 + self.K_4 / self.m**2
 
 if __name__ == "__main__":
     params = SystemParameters()

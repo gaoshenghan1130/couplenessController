@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from Iplatmodel import IplatModel
 from Iplatparam import SystemParameters
+from simu import rk4_fixed_step
 from Pd import pd_controller
 from L1 import L1_cp_controller
 
@@ -24,16 +25,16 @@ if __name__ == "__main__":
     
     print("Running simulation...")
     # Solve the initial value problem
-    sol = solve_ivp(ode_fun, t_span, z0, method='RK45', t_eval=t_eval)
+    sol = rk4_fixed_step(ode_fun, t_span, z0, dt=0.01)
     print("Simulation finished successfully!")
     
     # Extract results
-    time = sol.t
-    theta = sol.y[0]
-    theta_dot = sol.y[1]
-    r = sol.y[2]
-    r_dot = sol.y[3]
-    
+    time = sol[0]
+    theta = sol[1][0]
+    theta_dot = sol[1][1]
+    r = sol[1][2]
+    r_dot = sol[1][3]
+
     # ==========================================
     # 4.5 RECONSTRUCT CONTROL INPUT (F)
     # ==========================================
