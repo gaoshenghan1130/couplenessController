@@ -9,10 +9,6 @@ def L2_cp_controller(t, z, par = SystemParameters()):
     r = z[2]
     r_dot = z[3]
 
-    par.K_3 = par.K_1 = par.K_1
-    par.K_4 = par.K_2 = par.K_2
-    par.alpha = par.alpha
-    par.delta_t = par.delta_t
 
     # We want to use the first order of each variable for xs
     def cost(F):
@@ -27,11 +23,11 @@ def L2_cp_controller(t, z, par = SystemParameters()):
 
         tau_theta = (
             F * R
-            + G * np.sin(theta)
-            - m * g * r * np.cos(theta)
-            - m * r * (2 * r_dot * theta_dot + R * theta_dot**2)
+            #+ G * np.sin(theta)
+            #- m * g * r * np.cos(theta)
+            #- m * r * (2 * r_dot * theta_dot - R * theta_dot**2)
         )
-        F_r = F - m * g * np.sin(theta) + m * r * theta_dot**2
+        F_r = F #- m * g * np.sin(theta) + m * r * theta_dot**2
 
         delta_x_total = np.vstack(
             [
@@ -49,7 +45,7 @@ def L2_cp_controller(t, z, par = SystemParameters()):
             par.K_4
         ])
 
-        e = np.array([
+        e = par.alpha * np.array([
             -theta,
             -(r - R * theta),
             -theta_dot,
@@ -65,8 +61,8 @@ def L2_cp_controller(t, z, par = SystemParameters()):
 
         return cost
     
-    bound = 0.2/par.alpha
+    bound = 10000
 
     resF = minimize_scalar(cost, bounds=(-bound, bound), method='bounded')
 
-    return par.alpha * resF.x # type: ignore
+    return  resF.x # type: ignore

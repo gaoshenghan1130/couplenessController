@@ -7,17 +7,18 @@ from simu import rk4_fixed_step
 from Pd import pd_controller
 from L1 import L1_cp_controller
 from L2 import L2_cp_controller
+from L3 import L3_cp_controller
 
 if __name__ == "__main__":
     # Initialize parameters
     par = SystemParameters()
     
     # Initial states: [theta, theta_dot, r, r_dot]
-    z0 = [0.9 * np.pi/180, 0.0, 0.0, 0.0] 
+    z0 = [1.26 * np.pi/180, 0.0, 0.0, 0.0] 
     
     # Simulation time configuration
     t_start = 0.0
-    t_end = 10
+    t_end = 20
     t_span = (t_start, t_end)
     t_eval = np.linspace(t_start, t_end, 1000)
     
@@ -35,6 +36,12 @@ if __name__ == "__main__":
     theta_dot = sol[1][1]
     r = sol[1][2]
     r_dot = sol[1][3]
+
+    print("Params:")
+    print(f"K_1: {par.K_1}")
+    print(f"K_2: {par.K_2}")
+    print(f"K_3: {par.K_3}")
+    print(f"K_4: {par.K_4}")
 
     # ==========================================
     # 4.5 RECONSTRUCT CONTROL INPUT (F)
