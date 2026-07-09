@@ -160,3 +160,80 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.show()
+
+import numpy as np
+
+
+def rk4_fixed_step_zoh(model_fun, t_span, z0, dt, par, controller):
+    """
+    Fixed-step RK4 with zero-order-hold control.
+
+    Important:
+    Controller is evaluated only once per real time step.
+    The same F is used for k1, k2, k3, k4.
+
+    This avoids updating controller memory inside RK4 intermediate stages.
+    """
+
+    t0, tf = t_span
+    N = int((tf - t0) / dt)
+
+    t = np.linspace(t0, t0 + N * dt, N + 1)
+
+    z0 = np.asarray(z0, dtype=float)
+    z = np.zeros((len(z0), N + 1))
+    z[:, 0] = z0
+
+    F_hist = np.zeros(N + 1)
+
+    for i in range(N):
+        ti = t[i]
+        zi = z[:, i]
+
+        # Update controller memory once per real step
+        F_cmd = controller(
+            ti,
+            zi,
+            par,
+            update_memory=True
+        )
+
+        F_hist[i] = F_cmd
+
+        # Fixed controller for RK4 sub-steps
+        fixed_controller = lambda tt, zz, pp: F_cmd
+
+        k1 = model_fun(ti, zi, par, fixed_controller)
+
+        k2 = model_fun(
+            ti + dt / 2,
+            zi + dt * k1 / 2,
+            par,
+            fixed_controller
+        )
+
+        k3 = model_fun(
+            ti + dt / 2,
+            zi + dt * k2 / 2,
+            par,
+            fixed_controller
+        )
+
+        k4 = model_fun(
+            ti + dt,
+            zi + dt * k3,
+            par,
+            fixed_controller
+        )
+
+        z[:, i + 1] = zi + dt / 6 * (k1 + 2*k2 + 2*k3 + k4)
+
+        # Early stop safety
+        if np.any(np.isnan(z[:, i + 1])) or np.any(np.abs(z[:, i + 1]) > 1e6):
+            z[:, i + 1:] = np.nan
+            F_hist[i + 1:] = np.nan
+            break
+
+    F_hist[-1] = F_hist[-2]
+
+    return t, z, F_hist

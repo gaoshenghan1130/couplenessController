@@ -6,17 +6,18 @@ from Iplatparam import SystemParameters
 from simu import rk4_fixed_step
 from Pd import pd_controller
 from L1 import L1_cp_controller
+from L2 import L2_cp_controller
 
 if __name__ == "__main__":
     # Initialize parameters
     par = SystemParameters()
     
     # Initial states: [theta, theta_dot, r, r_dot]
-    z0 = [0.95 * np.pi/180, 0.0, 0.0, 0.0] 
+    z0 = [0.9 * np.pi/180, 0.0, 0.0, 0.0] 
     
     # Simulation time configuration
     t_start = 0.0
-    t_end = 10.0
+    t_end = 10
     t_span = (t_start, t_end)
     t_eval = np.linspace(t_start, t_end, 1000)
     
