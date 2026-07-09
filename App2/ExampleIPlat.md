@@ -23,7 +23,7 @@ Define:
 
 $$
 J = m_w R^2 + m_p (R + h)^2 + (I_w + I_b  + I_{rod}) \\
-m = m_{rod}
+m = m_{rod} \\
 G = m_w g R + m_p g (R + h) \\
 $$
 
@@ -230,13 +230,13 @@ $$
 Extracting $F$ to match the PD form of $F = -K \cdot \vec{e}$, we have:
 
 $$
-F \cdot \left( \frac{K_1 R^2 \Delta t}{J^2} + \frac{K_2 \Delta t}{m^2} + \frac{K_3 R}{J^2} + \frac{K_4}{m^2} \right) = K_1 e_1 \frac{R \Delta t}{J} + K_2 e_2 \frac{\Delta t}{m} + K_3 e_3 \frac{R}{J} + K_4 e_4 \frac{1}{m} - K_1 \left( \frac{G\theta - mgr}{J} \Delta t \right) \left( \frac{R\Delta t}{J} \right) - K_2 \left( -\frac{mg\theta}{m} \Delta t \right) \left( \frac{\Delta t}{m} \right) - K_3 \left( \frac{G\theta - mgr}{J} \right) \left( \frac{R}{J} \right) - K_4 \left( -\frac{mg\theta}{m}  \right) \left( \frac{1}{m} \right)
+F \cdot \left( \frac{K_1 R^2 \Delta t}{J^2} + \frac{K_2 \Delta t}{m^2} + \frac{K_3 R^2}{J^2} + \frac{K_4}{m^2} \right) = K_1 e_1 \frac{R \Delta t}{J} + K_2 e_2 \frac{\Delta t}{m} + K_3 e_3 \frac{R}{J} + K_4 e_4 \frac{1}{m} - K_1 \left( \frac{G\theta - mgr}{J} \Delta t \right) \left( \frac{R\Delta t}{J} \right) - K_2 \left( -\frac{mg\theta}{m} \Delta t \right) \left( \frac{\Delta t}{m} \right) - K_3 \left( \frac{G\theta - mgr}{J} \right) \left( \frac{R}{J} \right) - K_4 \left( -\frac{mg\theta}{m}  \right) \left( \frac{1}{m} \right)
 $$
 
 Since we are finding the weights near equilibrium, we can ignore the terms with $\theta$ and $r$, and we have:
 
 $$
-F =\alpha\times \frac{K_1 e_1 \frac{R \Delta t}{J} + K_2 e_2 \frac{\Delta t}{m} + K_3 e_3 \frac{R}{J} + K_4 e_4 \frac{1}{m}}{\frac{K_1 R^2 \Delta t}{J^2} + \frac{K_2 \Delta t}{m^2} + \frac{K_3 R}{J^2} + \frac{K_4}{m^2}}
+F =\alpha\times \frac{K_1 e_1 \frac{R \Delta t}{J} + K_2 e_2 \frac{\Delta t}{m} + K_3 e_3 \frac{R}{J} + K_4 e_4 \frac{1}{m}}{\frac{K_1 R^2 \Delta t}{J^2} + \frac{K_2 \Delta t}{m^2} + \frac{K_3 R^2}{J^2} + \frac{K_4}{m^2}}
 $$
 
 Notice we have $K_1, K_2, K_3, K_4, \alpha, \Delta t$ as parameters to tune, we expect $K_1 = K_3, K_2 = K_4$ because $\Delta t$ scales the relationship between the term orders. Actually only the portion of $K_1, K_2, K_3, K_4$ matters, and $\alpha$ will compansate for the scale of the solution.

@@ -4,6 +4,7 @@ from scipy.integrate import solve_ivp
 from Iplatmodel import IplatModel
 from Iplatparam import SystemParameters
 from Pd import pd_controller
+from L1 import L1_cp_controller
 
 if __name__ == "__main__":
     # Initialize parameters
@@ -14,11 +15,11 @@ if __name__ == "__main__":
     
     # Simulation time configuration
     t_start = 0.0
-    t_end = 20.0
+    t_end = 10.0
     t_span = (t_start, t_end)
-    t_eval = np.linspace(t_start, t_end, 10000)
+    t_eval = np.linspace(t_start, t_end, 1000)
     
-    controller = pd_controller  
+    controller = L1_cp_controller  
     ode_fun = lambda t, z: IplatModel(t, z, par, controller)
     
     print("Running simulation...")
