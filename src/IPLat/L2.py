@@ -19,15 +19,15 @@ def L2_cp_controller(t, z, par = SystemParameters()):
         m = par.m  # Assuming m_rod = 2 * par.m_L
         G = par.G
         J = par.J
-        delta_t = par.delta_t
+        delta_t = par.delta_t * 0.3
 
         tau_theta = (
             F * R
-            #+ G * np.sin(theta)
-            #- m * g * r * np.cos(theta)
-            #- m * r * (2 * r_dot * theta_dot - R * theta_dot**2)
+            + G * np.sin(theta)
+            - m * g * r * np.cos(theta)
+            - m * r * (2 * r_dot * theta_dot - R * theta_dot**2)
         )
-        F_r = F #- m * g * np.sin(theta) + m * r * theta_dot**2
+        F_r = F - m * g * np.sin(theta) + m * r * theta_dot**2
 
         delta_x_total = np.vstack(
             [

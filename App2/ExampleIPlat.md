@@ -290,4 +290,25 @@ For PD control with the LQR gains provided, the boundary initial theta are $0.95
 
 ![alt text](../src/IPLat/PD.png)
 
+1. L1: First Order Coupleness Controller
 
+If we keep only the "First Order" terms as follows, we have:
+
+$$
+\Delta X_{total} = \begin{bmatrix}
+\dfrac{\tau_\theta}{J} \Delta t \\[6pt]
+\dfrac{F_r}{m} \Delta t \\[6pt]
+\dfrac{\tau_\theta}{J} \\[6pt]
+\dfrac{F_r}{m}
+\end{bmatrix}
+$$
+
+Then the controller will behave as following at $95\degree$ initial theta:
+
+![alt text](../src/IPLat/L1.png)
+
+We can see that not only the response time is much faster, but also the overshoot is much smaller. Actually this controller will be able to stabilize the system at $1.27\degree$ initial theta, which $30\%$ more than the PD controller, see as follows:
+
+![alt text](../src/IPLat/L1_max.png)
+
+Notice that here $\Delta t = 5.4$ is almost the maximum response time for the controller. However we cannot increase $\Delta t$ too much, otherwise the controller will become unstable. The reason is that the coupleness matrix is only valid for small $\Delta t$, and if we increase it too much, the high order terms will dominate the system and make it unstable.
