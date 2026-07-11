@@ -22,14 +22,14 @@ def L2_cp_controller(t, z, par = SystemParameters()):
         G = par.G
         J = par.J
 
-        T1 = 6
+        T1 = 35
         T2 = 1
         
-        K_1 = par.K_1_L2 * T1 * 1.01
+        K_1 = par.K_1_L2 * T1 * 1.027
         K_2 = par.K_2_L2 * T1 
-        K_3 = par.K_3_L2 * T2  * 1.03
+        K_3 = par.K_3_L2 * T2  * 1.027 
         K_4 = par.K_4_L2 * T2 
-        delta_t = par.delta_t_L2 * 0.3
+        delta_t = par.delta_t_L2 * 0.2
 
         alpha = par.alpha_L2 * 0.2
 
