@@ -17,7 +17,7 @@ def L3_cp_controller(t, z, par=SystemParameters()):
     K_3 = par.K_3
     K_4 = par.K_4
 
-    delta_t = par.delta_t
+    delta_t = par.delta_t * 0.25
     alpha = par.alpha
 
     # L3 high-order strength.

@@ -2,6 +2,8 @@ from scipy.optimize import minimize_scalar
 from Iplatparam import SystemParameters
 import numpy as np
 
+init = False
+
 def L2_cp_controller(t, z, par = SystemParameters()):
     # Unpack states
     theta = z[0]
@@ -19,7 +21,26 @@ def L2_cp_controller(t, z, par = SystemParameters()):
         m = par.m  # Assuming m_rod = 2 * par.m_L
         G = par.G
         J = par.J
-        delta_t = par.delta_t * 0.3
+
+        T1 = 3
+        T2 = 1
+        
+        K_1 = par.K_1_L2 * T1
+        K_2 = par.K_2_L2 * T1
+        K_3 = par.K_3_L2 * T2
+        K_4 = par.K_4_L2 * T2
+        delta_t = par.delta_t_L2 * 0.8
+
+        alpha = par.alpha_L2 * 1.2
+
+        global init
+        if not init:
+            print(f"Using L2 controller with parameters:")
+            print(f"K_1 = {K_1}, K_2 = {K_2}, K_3 = {K_3}, K_4 = {K_4}")
+            print(f"delta_t = {delta_t}, alpha = {alpha}")
+            init = True
+
+        beta = 1
 
         tau_theta = (
             F * R
@@ -33,19 +54,19 @@ def L2_cp_controller(t, z, par = SystemParameters()):
             [
               tau_theta / J * delta_t,
               F_r / m * delta_t, 
-              tau_theta / J - 2 * r * theta_dot * F_r/J * delta_t,
-              F_r / m + r * theta_dot * tau_theta / J / m * delta_t
+              tau_theta / J - beta * 2 * r * theta_dot * F_r/J * delta_t,
+              F_r / m + beta * r * theta_dot * tau_theta / J / m * delta_t
               ]
         )  
 
         K = np.diag([
-            par.K_1,
-            par.K_2,
-            par.K_3,
-            par.K_4
+            K_1,
+            K_2,
+            K_3,
+            K_4
         ])
 
-        e = par.alpha * np.array([
+        e = alpha * np.array([
             -theta,
             -(r - R * theta),
             -theta_dot,

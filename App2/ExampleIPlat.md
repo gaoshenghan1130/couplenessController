@@ -303,7 +303,7 @@ $$
 \end{bmatrix}
 $$
 
-Then the controller will behave as following at $95\degree$ initial theta:
+Then the controller will behave as following at $0.95\degree$ initial theta:
 
 ![alt text](../src/IPLat/L1.png)
 

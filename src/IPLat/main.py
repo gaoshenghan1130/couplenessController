@@ -14,15 +14,15 @@ if __name__ == "__main__":
     par = SystemParameters()
     
     # Initial states: [theta, theta_dot, r, r_dot]
-    z0 = [1.27 * np.pi/180, 0.0, 0.0, 0.0] 
+    z0 = [0.5 * np.pi/180, 0.0, 0.0, 0.0] 
     
     # Simulation time configuration
     t_start = 0.0
-    t_end = 20
+    t_end = 10.0
     t_span = (t_start, t_end)
     t_eval = np.linspace(t_start, t_end, 1000)
     
-    controller = L1_cp_controller  
+    controller = L2_cp_controller  
     ode_fun = lambda t, z: IplatModel(t, z, par, controller)
     
     print("Running simulation...")
@@ -36,12 +36,6 @@ if __name__ == "__main__":
     theta_dot = sol[1][1]
     r = sol[1][2]
     r_dot = sol[1][3]
-
-    print("Params:")
-    print(f"K_1: {par.K_1}")
-    print(f"K_2: {par.K_2}")
-    print(f"K_3: {par.K_3}")
-    print(f"K_4: {par.K_4}")
 
     # ==========================================
     # 4.5 RECONSTRUCT CONTROL INPUT (F)
