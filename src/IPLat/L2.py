@@ -26,12 +26,12 @@ def L2_cp_controller(t, z, par = SystemParameters()):
         T2 = 1
         
         K_1 = par.K_1_L2 * T1 * 1.027
-        K_2 = par.K_2_L2 * T1 
-        K_3 = par.K_3_L2 * T2  * 1.027 
+        K_2 = par.K_2_L2 * T1 * 0.98
+        K_3 = par.K_3_L2 * T2  * 1 
         K_4 = par.K_4_L2 * T2 
-        delta_t = par.delta_t_L2 * 0.2
+        delta_t = par.delta_t_L2 * 0.097
 
-        alpha = par.alpha_L2 * 0.2
+        alpha = par.alpha_L2 * 0.15
 
         global init
         if not init:

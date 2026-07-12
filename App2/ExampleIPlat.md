@@ -307,8 +307,10 @@ Then the controller will behave as following at $0.95\degree$ initial theta:
 
 ![alt text](../src/IPLat/L1.png)
 
-We can see that not only the response time is much faster, but also the overshoot is much smaller. Actually this controller will be able to stabilize the system at $1.27\degree$ initial theta, which $30\%$ more than the PD controller, see as follows:
+We can see that not only the response time is much faster, but also the overshoot is much smaller. Actually this controller will be able to stabilize the system at $1.30\degree$ initial theta, which $30\%$ more than the PD controller, see as follows:
 
 ![alt text](../src/IPLat/L1_max.png)
 
 Notice that here $\Delta t = 5.4$ is almost the maximum response time for the controller. However we cannot increase $\Delta t$ too much, otherwise the controller will become unstable. The reason is that the coupleness matrix is only valid for small $\Delta t$, and if we increase it too much, the high order terms will dominate the system and make it unstable.
+
+2. L2: "Real First Order" Coupleness Controller ($(\Delta^1 t)$ Controller)
