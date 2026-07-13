@@ -313,4 +313,25 @@ We can see that not only the response time is much faster, but also the overshoo
 
 Notice that here $\Delta t = 5.4$ is almost the maximum response time for the controller. However we cannot increase $\Delta t$ too much, otherwise the controller will become unstable. The reason is that the coupleness matrix is only valid for small $\Delta t$, and if we increase it too much, the high order terms will dominate the system and make it unstable.
 
-2. L2: "Real First Order" Coupleness Controller ($(\Delta^1 t)$ Controller)
+2. L2: "Real First Order" Coupleness Controller ($\Delta^1 t$ Controller)
+
+If we keep all the terms containing $\Delta t$ but not $\Delta t^2$ in the controller, we have:
+
+$$
+\Delta X_{total} = \begin{bmatrix}
+\dfrac{\tau_\theta}{J} \Delta t \\[6pt]
+\dfrac{F_r}{m} \Delta t \\[6pt]
+\dfrac{\tau_\theta}{J} - \dfrac{2 r \dot{\theta} F_r}{J} \Delta t \\[6pt]
+\dfrac{F_r}{m} + \dfrac{r \dot{\theta} \tau_\theta}{J m} \Delta t 
+\end{bmatrix}
+$$
+
+After adding all the terms containing $\Delta t$ to the controller, at $0.95\degree$ initial theta we have:
+
+![alt text](../src/IPLat/L2.png)
+
+In fact, this controller will be able to stabilize the system at as large as $3.1\degree$ initial theta, which is $300\%$ more than the PD controller, see as follows:
+
+![alt text](../src/IPLat/L2_max.png)
+
+Although the magnitude of the force will be larger than the previous two controllers, $\Delta^1 t$ controller significantly reduce the overshoot and and response time. Actually, by tuning the params, we canmake the force as small as the PD controller do, but by then the stability region for initial theta will be smaller (about $2\degree$). 
