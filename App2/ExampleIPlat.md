@@ -1,5 +1,9 @@
 # 4.3 Latitudinal Dynamics of a Unicycle
 
+[TOC]
+
+## Model
+
 $$
 \begin{bmatrix} 
 m_w R^2 + m_{rod} r^2 + m_p (R + h)^2 + (I_w + I_b  + I_{rod}) & 0 \\ 
@@ -54,7 +58,7 @@ $$
 g_0(x) = \begin{bmatrix} x_3 \\ x_4 \\ \frac{1}{J} \left[ G \sin x_1 - m g (x_2 + R x_1) \cos x_1 - m (x_2 + R x_1) (2 x_3 x_4 + R x_3^2) \right] \\ (x_2 + R x_1) x_3^2 - g \sin x_1 \end{bmatrix}, \quad g_1(x) = \begin{bmatrix} 0 \\ 0 \\ \frac{R}{J} \\ \frac{1}{m} \end{bmatrix}
 $$
 
-#### Find Coupleness matrix
+### Find Coupleness matrix
 
 With python scripts, we can find the coupleness matrix $\mathcal{C}$ for the unicycle system:
 
@@ -96,11 +100,11 @@ $$
 $$
 
 $$
-\mathcal{C}_{43} = \frac{J \dot{\theta} r}{m \tau_\theta} \Delta \dot{\theta} + \frac{\Gamma_{43}}{6J^2 m} (\Delta \dot{\theta})^2
+\mathcal{C}_{43} = \frac{2J \dot{\theta} r}{\tau_\theta} \Delta \dot{\theta} + \frac{\Gamma_{43}}{6J^2 m} (\Delta \dot{\theta})^2
 $$
 
 And
-
+    
 $$
 \mathcal{C}_{14} = -\frac{r(J\dot{\theta} + mR\dot{r})}{3J^2} (\Delta x_4)^2
 $$
@@ -113,16 +117,16 @@ $$
 \mathcal{C}_{34} = -\frac{2m^2 r \dot{\theta}}{J F_r} \Delta x_4 + \frac{\Gamma_{34}}{6J^3} (\Delta x_4)^2
 $$
 
-#### Controller Design
+### Controller Design
 
 $$
-\Delta X_{total} = \begin{bmatrix} \Delta x_1 \\ \Delta x_2 \\ \Delta x_3 \\ \Delta x_4 \end{bmatrix} = \mathcal{C} \begin{bmatrix} 0 \\ 0 \\ \frac{\tau}{J}  \\ \frac{F_r}{m} \end{bmatrix}
+\Delta X_{total} = \begin{bmatrix} \Delta x_1 \\ \Delta x_2 \\ \Delta x_3 \\ \Delta x_4 \end{bmatrix} = \mathcal{C} \begin{bmatrix} 0 \\ 0 \\ \frac{\tau_\theta}{J}  \\ \frac{F_r}{m} \end{bmatrix}
 $$
 
 Define generalized acceleration vector:
 
 $$
-\ddot{X} = \begin{bmatrix} 0 \\ 0 \\ \frac{\tau}{J}  \\ \frac{F_r}{m} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ a_3 \\ a_4 \end{bmatrix}    
+\ddot{X} = \begin{bmatrix} 0 \\ 0 \\ \frac{\tau_\theta}{J}  \\ \frac{F_r}{m} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ a_3 \\ a_4 \end{bmatrix}    
 $$
 
 Substituting C back into the equation, we have:
@@ -133,7 +137,7 @@ $$
 -\frac{r(J\dot{\theta} + mR\dot{r})}{3J^2 m} (\Delta x_4)^2 F_r \\
 \frac{R r \dot{\theta}}{3} (\Delta \dot{\theta})^2 \tau_{\theta} + \Delta x_4 + \frac{R r \dot{\theta}}{3Jm} (\Delta x_4)^2 F_r   \\ 
 \frac{\tau_{\theta}}{J} -\frac{2m r \dot{\theta}}{J} \Delta x_4 + \frac{\Gamma_{34}}{6J^3m} (\Delta x_4)^2 F_r\\ 
-\frac{\dot{\theta} r}{m} \Delta \dot{\theta} + \frac{\Gamma_{43}}{6J^3 m} (\Delta \dot{\theta})^2 \tau_{\theta} + \frac{F_r}{m} 
+2\dot{\theta} r \Delta \dot{\theta} + \frac{\Gamma_{43}}{6J^3 m} (\Delta \dot{\theta})^2 \tau_{\theta} + \frac{F_r}{m} 
 \end{bmatrix} 
 $$
 
@@ -150,17 +154,30 @@ $$
 \dfrac{\tau_\theta}{J} \Delta t - \dfrac{r(J\dot{\theta} + mR\dot{r})}{3J^2} \left( \dfrac{\tau_\theta^3}{J^3} + \dfrac{F_r^3}{m^3} \right) \Delta t^2 \\ 
 \dfrac{F_r}{m} \Delta t + \dfrac{R r \dot{\theta}}{3J} \left( \dfrac{\tau_\theta^3}{J} + \dfrac{F_r^3}{m^3} \right) \Delta t^2 \\ 
 \dfrac{\tau_\theta}{J} - \dfrac{2 r \dot{\theta} F_r}{J} \Delta t + \dfrac{\Gamma_{34} F_r^3}{6 J^3 m^3} \Delta t^2 \\ 
-\dfrac{F_r}{m} + \dfrac{r \dot{\theta} \tau_\theta}{J m} \Delta t + \dfrac{\Gamma_{43} \tau_\theta^3}{6 J^5 m} \Delta t^2 
+\dfrac{F_r}{m} + \dfrac{2r \dot{\theta} \tau_\theta}{J } \Delta t + \dfrac{\Gamma_{43} \tau_\theta^3}{6 J^5 m} \Delta t^2 
 \end{bmatrix}
 $$
 
 We can see that $\Delta t$ scales the "Strength" of high-order terms, so we keep it as a variable to be tuned in the controller design. For the controller, we want to use:
 
 $$
-\min_u \| \Delta X_{total} - \vec{e} \|^2
+\min_F \| \Delta X_{total} - \vec{e} \|^2
 $$
 
 Where $\vec{e} = x_{desired} - x_{current}$ is the error vector. 
+
+#### Level 1 Coupleness Controller: Keep the first terms
+
+If we keep only the first terms in the $\Delta X_{total}$, we have:
+
+$$
+\Delta X_{total} = \begin{bmatrix}
+\dfrac{\tau_\theta}{J} \Delta t \\[6pt]
+\dfrac{F_r}{m} \Delta t \\[6pt]
+\dfrac{\tau_\theta}{J} \\[6pt]
+\dfrac{F_r}{m}
+\end{bmatrix}
+$$
 
 For the weights and gains, since we already have a LQR calculated PD controller with gains $K = [k_\theta, k_{\dot{\theta}}, k_r, k_{\dot{r}}] $, where:
 
@@ -216,21 +233,21 @@ Interestingly, we can see that the first two terms are scaled by $\Delta t$, whi
 Since the minimization problem will be equivalent to a second order convex optimization problem, we know the poles will be the solution. Thus F is given by:
 
 $$
-\frac{d}{dF} \| \Delta X_{total} - \vec{e} \|^2 = 0 \\
-\iff \frac{d}{dF}\big[K_1(x_1 - e_1)^2 + K_2(x_2 - e_2)^2 + K_3(x_3 - e_3)^2 + K_4(x_4 - e_4)^2 \big] = 0 \\
-\iff \Sigma_{i=1}^4 K_i (x_i - e_i) \frac{dx_i}{dF} = 0
+\frac{d}{dF} \| \Delta X_{total} - \alpha \vec{e} \|^2 = 0 \\
+\iff \frac{d}{dF}\big[K_1(x_1 - \alpha e_1)^2 + K_2(x_2 - \alpha e_2)^2 + K_3(x_3 - \alpha e_3)^2 + K_4(x_4 - \alpha e_4)^2 \big] = 0 \\
+\iff \Sigma_{i=1}^4 K_i (x_i - \alpha e_i) \frac{dx_i}{dF} = 0
 $$
 
 Plug in $\frac{dx_1}{dF} = \frac{R}{J} \Delta t$, $\frac{dx_2}{dF} = \frac{1}{m} \Delta t$, $\frac{dx_3}{dF} = \frac{R}{J}$, $\frac{dx_4}{dF} = \frac{1}{m}$, we have:
 
 $$
-K_1 \left( \frac{FR + G\theta - mgr}{J} \Delta t - e_1 \right) \left( \frac{R \Delta t}{J} \right) + K_2 \left( \frac{F - mg\theta}{m} \Delta t - e_2 \right) \left( \frac{\Delta t}{m} \right) + K_3 \left( \frac{FR + G\theta - mgr}{J} - e_3 \right) \left( \frac{R}{J} \right) + K_4 \left( \frac{F - mg\theta}{m} - e_4 \right) \left( \frac{1}{m} \right) = 0
+K_1 \left( \frac{FR + G\theta - mgr}{J} \Delta t - \alpha e_1 \right) \left( \frac{R \Delta t}{J} \right) + K_2 \left( \frac{F - mg\theta}{m} \Delta t - \alpha e_2 \right) \left( \frac{\Delta t}{m} \right) + K_3 \left( \frac{FR + G\theta - mgr}{J} - \alpha e_3 \right) \left( \frac{R}{J} \right) + K_4 \left( \frac{F - mg\theta}{m} - \alpha e_4 \right) \left( \frac{1}{m} \right) = 0
 $$
 
-Extracting $F$ to match the PD form of $F = -K \cdot \vec{e}$, we have:
+Extracting $F$ to match the PD form of $F = K \cdot \alpha \vec{e}$, we have:
 
 $$
-F \cdot \left( \frac{K_1 R^2 \Delta t^2}{J^2} + \frac{K_2 \Delta t^2}{m^2} + \frac{K_3 R^2}{J^2} + \frac{K_4}{m^2} \right) = K_1 e_1 \frac{R \Delta t}{J} + K_2 e_2 \frac{\Delta t}{m} + K_3 e_3 \frac{R}{J} + K_4 e_4 \frac{1}{m} - K_1 \left( \frac{G\theta - mgr}{J} \Delta t \right) \left( \frac{R\Delta t}{J} \right) - K_2 \left( -\frac{mg\theta}{m} \Delta t \right) \left( \frac{\Delta t}{m} \right) - K_3 \left( \frac{G\theta - mgr}{J} \right) \left( \frac{R}{J} \right) - K_4 \left( -\frac{mg\theta}{m}  \right) \left( \frac{1}{m} \right)
+F \cdot \left( \frac{K_1 R^2 \Delta t^2}{J^2} + \frac{K_2 \Delta t^2}{m^2} + \frac{K_3 R^2}{J^2} + \frac{K_4}{m^2} \right) = K_1 \alpha e_1 \frac{R \Delta t}{J} + K_2 \alpha e_2 \frac{\Delta t}{m} + K_3 \alpha e_3 \frac{R}{J} + K_4 \alpha e_4 \frac{1}{m} - K_1 \left( \frac{G\theta - mgr}{J} \Delta t \right) \left( \frac{R\Delta t}{J} \right) - K_2 \left( -\frac{mg\theta}{m} \Delta t \right) \left( \frac{\Delta t}{m} \right) - K_3 \left( \frac{G\theta - mgr}{J} \right) \left( \frac{R}{J} \right) - K_4 \left( -\frac{mg\theta}{m}  \right) \left( \frac{1}{m} \right)
 $$
 
 Since we are finding the weights near equilibrium, we can ignore the terms with $\theta$ and $r$, and we have:
@@ -239,7 +256,7 @@ $$
 F =\alpha\times \frac{K_1 e_1 \frac{R \Delta t}{J} + K_2 e_2 \frac{\Delta t}{m} + K_3 e_3 \frac{R}{J} + K_4 e_4 \frac{1}{m}}{\frac{K_1 R^2 \Delta t^2}{J^2} + \frac{K_2 \Delta t^2}{m^2} + \frac{K_3 R^2}{J^2} + \frac{K_4}{m^2}}
 $$
 
-Notice we have $K_1, K_2, K_3, K_4, \alpha, \Delta t$ as parameters to tune, we expect $K_1 = K_3, K_2 = K_4$ because $\Delta t$ scales the relationship between the term orders. Actually only the portion of $K_1, K_2, K_3, K_4$ matters, and $\alpha$ will compansate for the scale of the solution.
+Notice we have $K_1, K_2, K_3, K_4, \alpha, \Delta t$ as parameters to tune, we expect $K_1 = K_2, K_3 = K_4$ because $\Delta t$ scales the relationship between the term orders. Actually only the portion of $K_1, K_2, K_3, K_4$ matters, and $\alpha$ will compansate for the scale of the solution.
 
 In fact we can verify whether $K_1:K_3$ and $K_2:K_4$ are equal by comparing the ratio in the working PD gains:
 
@@ -276,21 +293,118 @@ K_1 = \frac{K_3}{\Delta t} = \frac{k_3'}{R/J \cdot \Delta t}, K_2 = \frac{K_4}{\
 \alpha = \frac{K_1 R^2 \Delta t^2}{J^2} + \frac{K_2 \Delta t^2}{m^2} + \frac{K_3 R}{J^2} + \frac{K_4}{m^2}
 $$
 
-This concludes our design:
+This concludes our design for the first level coupleness controller. The final controller is given by:
 
 $$
-F_{raw} = \min_F \Sigma_{i=1}^4 K_i (x_i - e_i)^2 \\
-F = \alpha F_{raw}
+F_{raw} = \min_F \Sigma_{i=1}^4 K_i (x_i - \alpha e_i)^2 \\
+$$
+
+#### Level 2: "Real First Order" Coupleness Controller ($\Delta^1 t$ Controller)
+
+If we keep all the terms containing $\Delta t$ but not $\Delta t^2$ in the controller, we have:
+
+$$
+\Delta X_{total} = \begin{bmatrix}
+\dfrac{\tau_\theta}{J} \Delta t \\[6pt]
+\dfrac{F_r}{m} \Delta t \\[6pt]
+\dfrac{\tau_\theta}{J} - \dfrac{2 r \dot{\theta} F_r}{J} \Delta t \\[6pt]
+\dfrac{F_r}{m} + \dfrac{2 r \dot{\theta} \tau_\theta}{J} \Delta t 
+\end{bmatrix}
+$$
+
+Here we can no longer use PD gains to find the weights, since $\Delta t$ should be significantly smaller so as not to dominate the high order terms. However we can still find the explicit solution for $F$ by solving similar optimization problem:
+
+$$
+\min_F \| \Delta X_{total} - \alpha \vec{e} \|^2 \\
+\iff \frac{d}{dF} \| \Delta X_{total} - \alpha \vec{e} \|^2 = 0 \\
+\iff \frac{d}{dF}\big[K_1(x_1 - \alpha e_1)^2 + K_2(x_2 - \alpha e_2)^2 + K_3(x_3 - \alpha e_3)^2 + K_4(x_4 - \alpha e_4)^2 \big] = 0 \\
+\iff \Sigma_{i=1}^4 K_i (x_i - \alpha e_i) \frac{dx_i}{dF} = 0
+$$
+
+We know $\frac{dF_r}{dF} = 1$ and $\frac{d\tau_\theta}{dF} = R$, so we can calculate $\frac{dx_i}{dF}$ as follows:
+
+$$
+\begin{aligned}
+\frac{dx_1}{dF} &= \frac{R}{J} \Delta t \\
+\frac{dx_2}{dF} &= \frac{1}{m} \Delta t \\
+\frac{dx_3}{dF} &= \frac{R}{J} - \frac{2 r \dot{\theta}}{J} \Delta t \\
+\frac{dx_4}{dF} &= \frac{1}{m} + \frac{2 r \dot{\theta}}{J} R \Delta t
+\end{aligned}
+$$
+
+We can then plug these into the optimization problem and solve for $F$ explicitly.
+
+$$
+\Sigma_{i=1}^4 K_i (x_i - \alpha e_i) \frac{dx_i}{dF} = 0 \\
 $$
 
 
-#### Simulation Results
+To extract $F$ to obtain an explicit control law, we first separate the force-dependent and state-dependent parts of $\tau_\theta$ and $F_r$: 
+
+$$
+\tau_\theta = R F + \bar{\tau}_\theta, \qquad F_r = F + \bar{F}_r
+$$ 
+ 
+where
+ 
+$$
+\bar{\tau}_\theta = G\sin\theta - mgr\cos\theta - mr\dot{\theta}(2\dot{r}-R\dot{\theta})
+$$
+
+and 
+
+$$
+\bar{F}_r = -mg\sin\theta + mr\dot{\theta}^2
+$$
+
+For convenience, define 
+
+$$ 
+q=r\dot{\theta}, \qquad h=\Delta t 
+$$
+
+The Level 2 state-change vector can then be written as 
+$$
+\Delta X_{\mathrm{total}} = \begin{bmatrix} \dfrac{(RF+\bar{\tau}_\theta)h}{J} \\[8pt] \dfrac{(F+\bar{F}_r)h}{m} \\[8pt] \dfrac{RF+\bar{\tau}_\theta}{J} - \dfrac{2qh(F+\bar{F}_r)}{J} \\[8pt] \dfrac{F+\bar{F}_r}{m} + \dfrac{2qh(RF+\bar{\tau}_\theta)}{J} \end{bmatrix} 
+$$
+
+Each component is affine in $F$ and can be expressed as 
+
+$$
+x_i(F)=a_iF+b_i
+$$
+
+The corresponding coefficients are
+
+$$
+\begin{aligned} a_1 &= \frac{Rh}{J}, & b_1 &= \frac{\bar{\tau}_\theta h}{J}, \\[6pt] a_2 &= \frac{h}{m}, & b_2 &= \frac{\bar{F}_r h}{m}, \\[6pt] a_3 &= \frac{R-2qh}{J}, & b_3 &= \frac{\bar{\tau}_\theta-2qh\bar{F}_r}{J}, \\[6pt] a_4 &= \frac{1}{m}+\frac{2qRh}{J}, & b_4 &= \frac{\bar{F}_r}{m} +\frac{2qh\bar{\tau}_\theta}{J}. \end{aligned}
+$$
+
+The weighted optimization problem is 
+
+$$
+F^* = \underset{F}{\operatorname{argmin}} \sum_{i=1}^{4} K_i\left(x_i(F)-\alpha e_i\right)^2
+$$
+
+Since:
+
+$$
+\frac{d}{dF} \sum_{i=1}^{4} K_i\left(a_iF+b_i-\alpha e_i\right)^2 = 2\sum_{i=1}^{4} K_i a_i \left(a_iF+b_i-\alpha e_i\right)
+$$
+
+The explicit solution will be given as:
+
+$$
+\boxed{ F^* = \frac{ \displaystyle \sum_{i=1}^{4} K_i a_i(\alpha e_i-b_i) }{ \displaystyle \sum_{i=1}^{4} K_i a_i^2 } }
+$$
+
+### Simulation Results
 
 For PD control with the LQR gains provided, the boundary initial theta are $0.95^\circ$ at $r = 0$, the simulation results are shown below:
 
 ![alt text](../src/IPLat/PD.png)
 
-1. L1: First Order Coupleness Controller
+#### Level 1: First term Coupleness Controller
 
 If we keep only the "First Order" terms as follows, we have:
 
@@ -313,7 +427,7 @@ We can see that not only the response time is much faster, but also the overshoo
 
 Notice that here $\Delta t = 5.4$ is almost the maximum response time for the controller. However we cannot increase $\Delta t$ too much, otherwise the controller will become unstable. The reason is that the coupleness matrix is only valid for small $\Delta t$, and if we increase it too much, the high order terms will dominate the system and make it unstable.
 
-2. L2: "Real First Order" Coupleness Controller ($\Delta^1 t$ Controller)
+#### Level 2: "Real First Order" Coupleness Controller ($\Delta^1 t$ Controller)
 
 If we keep all the terms containing $\Delta t$ but not $\Delta t^2$ in the controller, we have:
 
@@ -335,3 +449,5 @@ In fact, this controller will be able to stabilize the system at as large as $3.
 ![alt text](../src/IPLat/L2_max.png)
 
 Although the magnitude of the force will be larger than the previous two controllers, $\Delta^1 t$ controller significantly reduce the overshoot and and response time. Actually, by tuning the params, we canmake the force as small as the PD controller do, but by then the stability region for initial theta will be smaller (about $2\degree$). 
+
+Actually by increasing the initial $r$ value to $0.15m$, this controller can tolerant up to $5\degree$ initial theta, which indicate the this controller captures some nonlinearity of the system.

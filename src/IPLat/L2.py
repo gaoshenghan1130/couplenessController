@@ -55,7 +55,7 @@ def L2_cp_controller(t, z, par = SystemParameters()):
               tau_theta / J * delta_t,
               F_r / m * delta_t, 
               tau_theta / J - beta * 2 * r * theta_dot * F_r/J * delta_t,
-              F_r / m + beta * r * theta_dot * tau_theta / J / m * delta_t
+              F_r / m + beta * 2 * r * theta_dot * tau_theta / J * delta_t
               ]
         )  
 
