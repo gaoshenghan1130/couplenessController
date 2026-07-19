@@ -14,7 +14,7 @@ if __name__ == "__main__":
     par = SystemParameters()
     
     # Initial states: [theta, theta_dot, r, r_dot]
-    z0 = [3 * np.pi/180, 0.0, 0.0, 0.0] 
+    z0 = [0.95 * np.pi/180, 0.0, 0.0, 0.0] 
     
     # Simulation time configuration
     t_start = 0.0
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     t_span = (t_start, t_end)
     t_eval = np.linspace(t_start, t_end, 1000)
     
-    controller =L2_cp_controller  
+    controller =pd_controller  
     ode_fun = lambda t, z: IplatModel(t, z, par, controller)
     
     print("Running simulation...")

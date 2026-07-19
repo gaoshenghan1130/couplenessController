@@ -73,6 +73,7 @@ $$
 $$
 
 Using the Taylor reversion of series (or solving the quadratic formula by Taylor approximation), we can express $t$ as a function of $\Delta x_i$:
+
 $$
 t \approx \frac{\Delta x_i}{\dot{x}_i} - \frac{\ddot{x}_i}{2 \dot{x}_i^3} (\Delta x_i)^2 + \mathcal{O}((\Delta x_i)^3)
 $$
