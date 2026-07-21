@@ -174,9 +174,40 @@ $$
 (\frac{f(x)}{g(x)})' = \frac{f'(x) g(x) - f(x) g'(x)}{g^2(x)}
 $$
 
+Notice $ \frac{d}{dx_i}\big( \frac{\frac{\partial f_j}{\partial x_i}}{\dot{x}_i} \big)= \frac{\partial^2 f_j}{\partial x_i^2} \cdot \frac{1}{\dot{x}_i} - \frac{\partial f_j}{\partial x_i} \cdot \frac{d}{dx_i} \left( \frac{1}{\dot{x}_i} \right) = \frac{\partial^2 f_j}{\partial x_i^2} \cdot \frac{1}{\dot{x}_i} - \frac{\partial f_j}{\partial x_i} \cdot \left( - \frac{1}{\dot{x}_i^2} \cdot \frac{d \dot{x}_i}{dx_i} \right) $. 
+
+And through chain rule $\frac{d \dot{x}_i}{dx_i} = \frac{d \dot{x}_i}{dt} \cdot \frac{dt}{dx_i} = \frac{\ddot{x}_i}{\dot{x}_i}$, we have:
+
 $$
-\frac{1}{2}\left(  \left( \left. \frac{\partial^2 f_j}{\partial x_i^2} \right|_{x_0} \right) - \left( \left. \frac{\partial f_j}{\partial x_i} \right|_{x_0} \right) \cdot \frac{\ddot{x}_i}{\dot{x}_i^2}  \right) \frac{(\Delta x_i)^2}{\dot{x}_i} \\
-= \frac{1}{2}\left(  \left( \left. \frac{\partial^2 f_j}{\partial x_i^2} \right|_{x_0} \right) - \left( \left. \frac{\partial f_j}{\partial x_i} \right|_{x_0} \right) \cdot \frac{\ddot{x}_i}{\dot{x}_i^2}  \right) \frac{(\Delta x_i)}{\dot{x}_i ^2}
+\frac{d}{dx_i}\big( \frac{\frac{\partial f_j}{\partial x_i}}{\dot{x}_i} \big) = \frac{\partial^2 f_j}{\partial x_i^2} \cdot \frac{1}{\dot{x}_i} - \frac{\partial f_j}{\partial x_i} \cdot \frac{\ddot{x}_i}{\dot{x}_i^2} \\
+= \left(  \left( \left. \frac{\partial^2 f_j}{\partial x_i^2} \right|_{x_0} \right) - \left( \left. \frac{\partial f_j}{\partial x_i} \right|_{x_0} \right) \cdot \frac{\ddot{x}_i}{\dot{x}_i^2}  \right) \frac{1}{\dot{x}_i}
 $$
 
-We can do an approximation of $\dot{x}_i =\frac{d x_i}{dt} \iff \frac{1}{\dot{x}_i dt} = \frac{1}{d x_i} \iff \frac{1}{\dot{x}_i} \frac{d}{dt} = \frac{d}{d x_i}$, and similarly $\ddot{x}_i = \frac{d^2 x_i}{dt^2}$ and we get$ \frac{\ddot{x}_i}{\dot{x}_i^2} = \frac{d^2 x_i}{dt^2} \cdot \frac{dt^2}{dx_i^2} = \frac{d^2 x_i}{dx_i^2}$.
+Define coupleness "Gain" as $G_{ij} = \frac{1}{\dot{x}_i} \frac{\partial f_j}{\partial x_i}$, we have:
+
+$$
+\frac{\Delta x_j}{\Delta x_i} \approx G_{ij} \Delta x_i + \frac{1}{2} \frac{d G_{ij}}{dx_i} (\Delta x_i)^2
+$$
+
+From this formate, we can guess that the higher order approximation of coupleness can be expressed as:
+
+$$
+\frac{\Delta x_j}{\Delta x_i} \approx G_{ij} \Delta x_i + \frac{1}{2} \frac{d G_{ij}}{dx_i} (\Delta x_i)^2 + \frac{1}{6} \frac{d^2 G_{ij}}{dx_i^2} (\Delta x_i)^3 + \ldots \\
+= \sum_{k=1}^{\infty} \frac{1}{k!} \frac{d^{k-1} G_{ij}}{dx_i^{k-1}} (\Delta x_i)^k \\
+= \int_{x_0}^{x_0 + \Delta x_i} G_{ij} dx_i
+$$
+
+We can then define coupleness matrix as:
+
+$$
+\mathcal{C}_{ji} = \int_{x_0}^{x_0 + \Delta x_i} G_{ij} dx_i
+= \int_{x_0}^{x_0 + \Delta x_i} \frac{1}{\dot{x}_i} \frac{\partial f_j}{\partial x_i} dx_i
+$$
+
+Notice that if $\Delta x_i = \dot{x}_i \cdot t$, then all the $\dot{x}_i$ will cancel out in the intergral.
+
+We can thus get the next step displacement as:
+
+$$
+\Delta x = \mathcal{C} u
+$$
