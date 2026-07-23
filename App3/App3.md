@@ -2,6 +2,8 @@
 
 Previously, after several trials and errors, I considered defining a route-based control strategy that better captures the original ideas of coupleness and separation of concerns in controller design.
 
+[TOC]
+
 ## 1. Core concepts
 
 ### 1.1 Input layers
@@ -103,7 +105,7 @@ $$
 The reason for the above definition is that we can view interference of different state variables separately. For example:
 
 $$
-(\delta x)^{[i+1]}_p = \sum_{j=1}^{n} (\delta x)^{[i]}_{p,j} \Delta t
+(\delta x)^{[i+1]}_p = T(i+1)\sum_{j=1}^{n} (\delta x)^{[i]}_{p,j} \Delta t
 $$ 
 
 This term will indicate the exact portion of $\delta x^{[i]}$ that will cause the change of $\delta x^{[i+1]}_p$. This is the route of input from $x_j$ to $x_p$.
@@ -111,7 +113,7 @@ This term will indicate the exact portion of $\delta x^{[i]}$ that will cause th
 And specifically, we can also take out:
 
 $$
-((\delta x)^{[i+1]}_p)_{k \text{ contribution}} = T(k)A_{p,k}(\delta x)^{[i]}_{p,k} \Delta t
+((\delta x)^{[i+1]}_p)_{k \text{ contribution}} = T(i+1)A_{p,k}(\delta x)^{[i]}_{p,k} \Delta t
 $$
 
 
@@ -128,3 +130,84 @@ $$
 To sum up:
 
 ![alt text](routeIdea.png)
+
+### 1.3 Route Relation measurement
+
+Now that given a expression of a route of input:
+
+$$
+\delta x_{i_d}^{(\text{route})} = \frac{(\Delta t)^{d+1}}{(d+1)!} \left( \prod_{j=0}^{d-1} A_{i_{j+1},i_j} \right) B_{i_0} \delta u \\
+or \\
+\delta x_{i_d}^{(\text{route})} = \frac{(\Delta t)^{d}}{(d+1)!} \left( \prod_{j=0}^{d-1} A_{i_{j+1},i_j} \right) (x_{i_0}^{(\text{route})})^{[0]}
+$$
+
+To simplify the notation, we can use the graph theory method:
+
+> **Definition 1.3.1**
+$$
+x_j \xrightarrow{A_{ij}} x_i,
+$$
+Is the coupleness edge from $x_j$ to $x_i$. Notice that it only depends on the index of the variable not the number of layers of input.
+
+Naturally, a direct input-to-state edge will be written as
+
+$$
+u \xrightarrow{B_i} x_i,
+$$
+
+> **Definition 1.3.2**
+The symbol
+$$
+x_j \rightsquigarrow x_i
+$$
+indicates that at least one directed route exists from \(x_j\) to \(x_i\).
+
+#### Input route definition
+
+Any route from the input to a state variable can be defined similar to a route \(\pi\) as
+
+$$
+\pi:
+\quad
+u
+\xrightarrow{B_{i_0}}
+x_{i_0}
+\xrightarrow{A_{i_1i_0}}
+x_{i_1}
+\xrightarrow{A_{i_2i_1}}
+\cdots
+\xrightarrow{A_{i_di_{d-1}}}
+x_{i_d}.
+$$
+
+The number of edges in this route is
+
+$$
+|\pi|=d+1.
+$$
+
+> **Definition 1.3.3**
+For a route $\pi: x_{i_0} \rightsquigarrow x_{i_d} $, define the instantaneous route weight as
+$$
+w(\pi)
+=
+\left(
+\prod_{j=0}^{d-1}
+A_{i_{j+1},i_j}
+\right)
+B_{i_0}.
+$$
+Notice $d-1 \geq 0$ for any route with at least one edge.
+
+
+Equivalently,
+
+$$
+w(\pi)
+=
+A_{i_di_{d-1}}
+A_{i_{d-1}i_{d-2}}
+\cdots
+A_{i_1i_0}
+B_{i_0}.
+$$
