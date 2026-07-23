@@ -1,0 +1,130 @@
+# Route-Based Control Strategy — Approach 3
+
+Previously, after several trials and errors, I considered defining a route-based control strategy that better captures the original ideas of coupleness and separation of concerns in controller design.
+
+## 1. Core concepts
+
+### 1.1 Input layers
+
+For the nonlinear system
+
+$$
+\dot{x}=f(x,u) = g_0(x) + g_1(x)u, x\in \mathbb{R}^n, u\in \mathbb{R}^m
+$$
+
+The core idea is to **view $\delta x_i$ as an input**.
+
+Previously, the "Coupleness" Controller (that works out successfully), intrinsically do the following:
+
+1. Propagate the time for $\delta x_j$ to occur
+2. Plug the time into the expression of interfered state change tendency of $\delta x_j$ on $\delta x_i$.
+3. Approximate direct influence of $u$ on each $\delta x_j$ and view them independently.
+
+This gives a expression of:
+
+$$
+\begin{aligned}
+\frac{\Delta x_j}{\Delta x_i} \approx& \left( \left. \frac{\partial f_j}{\partial x_i} \right|_{x_0} \right) \cdot \frac{\Delta x_i}{\dot{x}_i} \\
+& + \frac{1}{2}\left(  \left( \left. \frac{\partial^2 f_j}{\partial x_i^2} \right|_{x_0} \right) - \left( \left. \frac{\partial f_j}{\partial x_i} \right|_{x_0} \right) \cdot \frac{\ddot{x}_i}{\dot{x}_i^2}  \right) \frac{(\Delta x_i)^2}{\dot{x}_i} \\
+& + \mathcal O(\Delta x_i^3) \\
+=& \int_{x_0}^{x_0 + \Delta x_i} \frac{1}{\dot{x}_i} \frac{\partial f_j}{\partial x_i} dx_i
+\end{aligned}
+$$
+
+Here $\frac{\partial f_j}{\partial x_i}$ is the instantaneous coupleness between $x_i$ and $x_j$, while $\frac{1}{\dot{x}_i}$ is the time propagation factor. The integral form captures the finite-time effect of $\delta x_i$ on $\delta x_j$.
+
+The term $\frac{1}{\dot{x}_i}$ is function as a compensation for the unit, because $f$ will output the derivative.
+
+In this aspect we view the system as a overlap as several layers of input cause by coupleness:
+
+> **Definition 1.1.1**
+Given a input $u$, it will cause a direct change of $(\delta \dot x)^{[0]}$, which is the first layer of input. Define:
+$$
+(\delta \dot x)^{[0]} = \frac{\partial f}{\partial u} \delta u
+$$
+To make the layers overlappable, we need the expression of $\delta x$ instead of $\delta \dot x$. So we have:
+$$
+\int_t^{t+\Delta t}
+\frac{\partial f}{\partial u}
+\bigl(x(\tau),u(\tau)\bigr)
+\delta u(\tau) d\tau.
+$$
+We assume $u$ is constant over a short time interval, which is usually the case in control design implementation. So we have:
+$$
+\delta u(\tau)\approx\delta u,
+$$
+In my philosoply, the direct layer of input is the one that caused $\delta x$ to move uniformly as follows (is also a the first term of Taylor expansion):
+$$
+(\int_t^{t+\Delta t}\frac{\partial f}{\partial u}
+\bigl(x(\tau),u(\tau)\bigr) d\tau )^{[1]}
+= \left.
+\frac{\partial f}{\partial u}
+\right|_{x(t),u(t)} \Delta t
+$$
+Which gives 
+$$
+\boxed{
+(\delta x)^{[0]}
+= \frac{\partial f}{\partial u}
+\delta u\Delta t = B \delta u \Delta t
+}
+$$
+
+The mathmatical support for this is from the Taylor expansion of $f$ with respect to $u$:
+$$
+f(x,u+\delta u) = f(x,u) + \frac{\partial f}{\partial u} \delta u + \mathcal O(\delta u^2)
+$$
+For the second layer of input, we need more careful definition. 
+
+>**Definition 1.1.2**
+Given a input $u$, it will cause a direct change of $(\delta \dot x)^{[1]}$, which is the first layer of input. Define:
+$$
+(\delta \dot x)^{[k+1]} = \frac{\partial f}{\partial x} (\delta x)^{[k]}
+$$
+Similarly, we can have the expression of $\delta x$ instead of $\delta \dot x$. So we have:
+$$
+(\delta x)^{[k+1]} = T(k)\frac{\partial f}{\partial x} (\delta x)^{[k]} \Delta t = T(k)A (\delta x)^{[k]} \Delta t
+$$
+Here $T(k) = \frac{1}{k+2}$ is the time propagation factor for the $k$-th layer of input. Because the higher layer of input will have lower impact on the system. Full expression of $\delta x^{[k]}$ is:
+$$
+(\delta x)^{[k]} = \left( \prod_{i=0}^{k-1} T(i) A \right) (\delta x)^{[0]} \Delta t \\
+= \frac{1}{(k+1)!} A^k (\delta x)^{[0]} \Delta t \\
+= \frac{1}{(k+1)!} A^k B \delta u \Delta t
+$$
+
+From these definitions, we naturally have the following expression of $\delta x$ caused by $u$:
+
+$$
+\delta x = \sum_{k=0}^{\infty} (\delta x)^{[k]}
+$$
+
+### 1.2 Input route
+
+The reason for the above definition is that we can view interference of different state variables separately. For example:
+
+$$
+(\delta x)^{[i+1]}_p = \sum_{j=1}^{n} (\delta x)^{[i]}_{p,j} \Delta t
+$$ 
+
+This term will indicate the exact portion of $\delta x^{[i]}$ that will cause the change of $\delta x^{[i+1]}_p$. This is the route of input from $x_j$ to $x_p$.
+
+And specifically, we can also take out:
+
+$$
+((\delta x)^{[i+1]}_p)_{k \text{ contribution}} = T(k)A_{p,k}(\delta x)^{[i]}_{p,k} \Delta t
+$$
+
+
+
+And this will give us an exact route of input: $x_k \to x_p$.
+
+Even better, a full route of input with $u \to x_{i_1} \to \ldots \to x_{i_d}$ can be defined as:
+
+$$
+\delta x_{i_d}^{(\text{route})} = \frac{(\Delta t)^{d+1}}{(d+1)!} A_{i_d i_{d-1}} A_{i_{d-1}i_{d-2}} \cdots A_{i_1i_0} B_{i_0} \delta u \\
+= \frac{(\Delta t)^{d+1}}{(d+1)!} \left( \prod_{j=0}^{d-1} A_{i_{j+1},i_j} \right) B_{i_0} \delta u
+$$
+
+To sum up:
+
+![alt text](routeIdea.png)
