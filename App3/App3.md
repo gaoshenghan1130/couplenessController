@@ -177,13 +177,13 @@ x_{i_1}
 \xrightarrow{A_{i_2i_1}}
 \cdots
 \xrightarrow{A_{i_di_{d-1}}}
-x_{i_d}.
+x_{i_d}
 $$
 
 The number of edges in this route is
 
 $$
-|\pi|=d+1.
+|\pi|=d+1
 $$
 
 > **Definition 1.3.3**
@@ -195,12 +195,12 @@ w(\pi)
 \prod_{j=0}^{d-1}
 A_{i_{j+1},i_j}
 \right)
-B_{i_0}.
+B_{i_0}
 $$
 Notice $d-1 \geq 0$ for any route with at least one edge.
 
 
-Equivalently,
+If expended, we have
 
 $$
 w(\pi)
@@ -209,5 +209,157 @@ A_{i_di_{d-1}}
 A_{i_{d-1}i_{d-2}}
 \cdots
 A_{i_1i_0}
-B_{i_0}.
+B_{i_0}
+$$
+
+>**Definition 1.3.4**
+Define the finite-time route coupleness over the interval \(\Delta t\) as
+$$
+\boxed{
+\mathfrak C_{\Delta t}(\pi)
+=
+\frac{(\Delta t)^{|\pi|}}{|\pi|!}
+w(\pi)
+}
+$$
+
+Since \(|\pi|=d+1\), this can be written as
+
+$$
+\boxed{
+\mathfrak C_{\Delta t}(\pi)
+=
+\frac{(\Delta t)^{d+1}}{(d+1)!}
+\left(
+\prod_{j=0}^{d-1}
+A_{i_{j+1},i_j}
+\right)
+B_{i_0}
+}
+$$
+
+The state displacement generated through route \(\pi\) is
+
+$$
+\delta x_{i_d}^{(\pi)}
+=
+\mathfrak C_{\Delta t}(\pi)\,\delta u
+$$
+
+Expanding the definition gives
+
+$$
+\delta x_{i_d}^{(\pi)}
+=
+\frac{(\Delta t)^{d+1}}{(d+1)!}
+\left(
+\prod_{j=0}^{d-1}
+A_{i_{j+1},i_j}
+\right)
+B_{i_0}\delta u
+$$
+
+A route \(\pi\) is called a **direct route** if \(|\pi|=1\), i.e., it consists of a single edge. Otherwise, it is called an **indirect route**.
+
+#### Expression using the direct-layer displacement
+
+Since we already have the direct-layer displacement of \(x_{i_0}\) as
+
+$$
+(\delta x_{i_0})^{[0]}
+=
+\Delta t\,B_{i_0}\delta u
+$$
+
+Then the same route contribution can be written as
+
+$$
+\boxed{
+\delta x_{i_d}^{(\pi)}
+=
+\frac{(\Delta t)^d}{(d+1)!}
+\left(
+\prod_{j=0}^{d-1}
+A_{i_{j+1},i_j}
+\right)
+(\delta x_{i_0})^{[0]}
+}
+$$
+
+### Set of routes
+
+Define the set of all routes from \(u\) to \(x_i\) as
+
+$$
+\Pi(x_{i_a},x_{i_b})
+=
+\left\{
+\pi\mid x_{i_a}\rightsquigarrow x_{i_b}
+\right\}.
+$$
+
+>**Definition 1.3.5**
+Define the total finite-time coupleness from \(u\) to \(x_i\) as
+$$
+\mathfrak C_{i ｜ u}(\Delta t)
+=
+\sum_{\pi\in\Pi(u,x_i)}
+\mathfrak C_{\Delta t}(\pi)
+$$
+
+>**Definition 1.3.6**
+Define the total finite-time coupleness from \(x_{i_a}\) to \(x_{i_b}\) under \(u\) as
+$$
+\mathfrak C_{i_b\leftarrow i_a ｜ u}(\Delta t)
+=
+\frac{\sum_{\pi\in\Pi(u,x_{i_b})}
+\mathfrak C_{\Delta t}(\pi)}{\sum_{\pi\in\Pi(u,x_{i_a})}
+\mathfrak C_{\Delta t}(\pi)}
+$$
+Note this requires that \(\sum_{\pi\in\Pi(u,x_{i_a})}
+\mathfrak C_{\Delta t}(\pi)\neq 0\), meaning that the route $\Pi(u,x_{i_a})$ is non-empty and $u$ will have a non-zero influence on $x_{i_a}$.
+Also note that it is not equivalent to and we cannot define it as:
+$$
+\mathfrak C_{i_b\leftarrow i_a ｜ u}(\Delta t)
+=
+\sum_{\pi\in\Pi(x_{i_a},x_{i_b})}
+\mathfrak C_{\Delta t}(\pi)
+$$
+Because the route from \(x_{i_a}\) to \(x_{i_b}\) may not be the same as the route from \(u\) to \(x_{i_b}\). The former is a subset of the latter, and the latter may contain other routes that do not pass through \(x_{i_a}\), so the coefficient inside $\mathfrak C$ will be different.
+
+Therefore, the total input-induced displacement between \(x_{i_a}\) and \(x_{i_b}\) is
+
+$$
+\delta x_{i_b}
+=
+\mathfrak C_{i_b\leftarrow i_a ｜ u}(\Delta t)\,\delta x_{i_a}
+$$
+
+Naturally the total input-induced displacement from \(u\) to \(x_i\) is
+
+$$
+\delta x_i
+=
+\mathfrak C_{i\leftarrow u | u }(\Delta t)\,\delta u = \mathfrak C_{i | u }(\Delta t)\,\delta u 
+$$
+
+Equivalently,
+
+$$
+\delta x_i
+=
+\sum_{\pi\in\Pi(u,x_i)}
+\delta x_i^{(\pi)}.
+$$
+
+From the here we finish the definition of route-based coupleness and the expression of input-induced displacement. From now on we will use:
+
+$$
+\mathfrak C_i = \mathfrak C_{i | u}(\Delta t)
+$$
+
+And use 
+
+$$
+\mathfrak C(\pi) = \mathfrak C_{\Delta t}(\pi)
 $$
