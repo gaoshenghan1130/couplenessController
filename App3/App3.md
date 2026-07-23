@@ -35,7 +35,8 @@ $$
 
 Here $\frac{\partial f_j}{\partial x_i}$ is the instantaneous coupleness between $x_i$ and $x_j$, while $\frac{1}{\dot{x}_i}$ is the time propagation factor. The integral form captures the finite-time effect of $\delta x_i$ on $\delta x_j$.
 
-The term $\frac{1}{\dot{x}_i}$ is function as a compensation for the unit, because $f$ will output the derivative.
+The term $\frac{1}{\dot{x}_i}$ is function as a compensation for the unit, because $f$ will output the derivative. However, the incompleteness of the expression causes sine mathmatical issues, and we dump it for now and reconstruct the idea.
+
 
 In this aspect we view the system as a overlap as several layers of input cause by coupleness:
 
@@ -87,11 +88,11 @@ Similarly, we can have the expression of $\delta x$ instead of $\delta \dot x$. 
 $$
 (\delta x)^{[k+1]} = T(k)\frac{\partial f}{\partial x} (\delta x)^{[k]} \Delta t = T(k)A (\delta x)^{[k]} \Delta t
 $$
-Here $T(k) = \frac{1}{k+2}$ is the time propagation factor for the $k$-th layer of input. Because the higher layer of input will have lower impact on the system. Full expression of $\delta x^{[k]}$ is:
+Here $T(k) = \frac{1}{k+2}$ is the time propagation factor for the $k$-th layer of input. Because the higher layer of input will different impact on the system due to multiple time intergations. Full expression of $\delta x^{[k]}$ is:
 $$
-(\delta x)^{[k]} = \left( \prod_{i=0}^{k-1} T(i) A \right) (\delta x)^{[0]} \Delta t \\
-= \frac{1}{(k+1)!} A^k (\delta x)^{[0]} \Delta t \\
-= \frac{1}{(k+1)!} A^k B \delta u \Delta t
+(\delta x)^{[k]} = \left( \prod_{i=0}^{k-1} T(i) A \right) (\delta x)^{[0]} \Delta t^{k+1} \\
+= \frac{1}{(k+1)!} A^k (\delta x)^{[0]} \Delta t^{k+1} \\
+= \frac{1}{(k+1)!} A^k B \delta u \Delta t^{k+1}
 $$
 
 From these definitions, we naturally have the following expression of $\delta x$ caused by $u$:
@@ -105,15 +106,15 @@ $$
 The reason for the above definition is that we can view interference of different state variables separately. For example:
 
 $$
-(\delta x)^{[i+1]}_p = T(i+1)\sum_{j=1}^{n} (\delta x)^{[i]}_{p,j} \Delta t
+\big[ (\delta x)^{[i+1]}\big ]_p = T(i)\sum_{j=1}^{n} (\delta x)^{[i]}_{p,j} \Delta t
 $$ 
 
-This term will indicate the exact portion of $\delta x^{[i]}$ that will cause the change of $\delta x^{[i+1]}_p$. This is the route of input from $x_j$ to $x_p$.
+This term will indicate the exact portion of $\delta x^{[i]}$ that will cause the change of $\delta x^{[i+1]}$ on $x_p$ variable. This is the route of input from $x_j$ to $x_p$.
 
 And specifically, we can also take out:
 
 $$
-((\delta x)^{[i+1]}_p)_{k \text{ contribution}} = T(i+1)A_{p,k}(\delta x)^{[i]}_{p,k} \Delta t
+(\big[(\delta x)^{[i+1]}\big ]_p)_{k \text{ contribution}} = T(i+1)A_{p,k}(\delta x)^{[i]}_{p,k} \Delta t
 $$
 
 
@@ -187,7 +188,7 @@ $$
 $$
 
 > **Definition 1.3.3**
-For a route $\pi: x_{i_0} \rightsquigarrow x_{i_d} $, define the instantaneous route weight as
+For a route $\pi: u \rightarrow x_{i_0} \rightsquigarrow x_{i_d} $, define the instantaneous route weight as
 $$
 w(\pi)
 =
@@ -197,7 +198,7 @@ A_{i_{j+1},i_j}
 \right)
 B_{i_0}
 $$
-Notice $d-1 \geq 0$ for any route with at least one edge.
+Notice at $d-1 = -1$, we need to define $\prod_{j=0}^{-1} A_{i_{j+1},i_j} = 1$, because it indicate the direct route of $u \xrightarrow{B_{i_0}} x_{i_0}$, which is the direct input-to-state coupleness.
 
 
 If expended, we have
@@ -302,8 +303,7 @@ $$
 Define the total finite-time coupleness from \(u\) to \(x_i\) as
 $$
 \mathfrak C_{i ｜ u}(\Delta t)
-=
-\sum_{\pi\in\Pi(u,x_i)}
+:=\sum_{\pi\in\Pi(u,x_i)}
 \mathfrak C_{\Delta t}(\pi)
 $$
 
@@ -311,21 +311,19 @@ $$
 Define the total finite-time coupleness from \(x_{i_a}\) to \(x_{i_b}\) under \(u\) as
 $$
 \mathfrak C_{i_b\leftarrow i_a ｜ u}(\Delta t)
-=
-\frac{\sum_{\pi\in\Pi(u,x_{i_b})}
+:=\frac{\sum_{\pi\in\Pi(u,x_{i_b})}
 \mathfrak C_{\Delta t}(\pi)}{\sum_{\pi\in\Pi(u,x_{i_a})}
 \mathfrak C_{\Delta t}(\pi)}
 $$
 Note this requires that \(\sum_{\pi\in\Pi(u,x_{i_a})}
 \mathfrak C_{\Delta t}(\pi)\neq 0\), meaning that the route $\Pi(u,x_{i_a})$ is non-empty and $u$ will have a non-zero influence on $x_{i_a}$.
-Also note that it is not equivalent to and we cannot define it as:
+Also note that it is not equivalent to and we **cannot** define it as:
 $$
 \mathfrak C_{i_b\leftarrow i_a ｜ u}(\Delta t)
-=
-\sum_{\pi\in\Pi(x_{i_a},x_{i_b})}
+:=\sum_{\pi\in\Pi(x_{i_a},x_{i_b})}
 \mathfrak C_{\Delta t}(\pi)
 $$
-Because the route from \(x_{i_a}\) to \(x_{i_b}\) may not be the same as the route from \(u\) to \(x_{i_b}\). The former is a subset of the latter, and the latter may contain other routes that do not pass through \(x_{i_a}\), so the coefficient inside $\mathfrak C$ will be different.
+Because the route from \(x_{i_a}\) to \(x_{i_b}\) may not be the same as the route from \(u\) to \(x_{i_b}\). The former "contains" the latter, and the latter may contain other routes that do not pass through \(x_{i_a}\), so the coefficient inside $\mathfrak C$ will be different.
 
 Therefore, the total input-induced displacement between \(x_{i_a}\) and \(x_{i_b}\) is
 
@@ -355,11 +353,17 @@ $$
 From the here we finish the definition of route-based coupleness and the expression of input-induced displacement. From now on we will use:
 
 $$
-\mathfrak C_i = \mathfrak C_{i | u}(\Delta t)
+\mathfrak C_i := \mathfrak C_{i | u}(\Delta t)= \sum_{\pi\in\Pi(u,x_i)}
+\mathfrak C_{\Delta t}(\pi)
 $$
 
 And use 
 
 $$
-\mathfrak C(\pi) = \mathfrak C_{\Delta t}(\pi)
+\mathfrak C(\pi):= \mathfrak C_{\Delta t}(\pi) = \frac{(\Delta t)^{|\pi|}}{|\pi|!}
+\left(
+\prod_{j=0}^{|\pi|-2}
+A_{i_{j+1},i_j}
+\right)
+B_{i_0}
 $$
